@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-apply plugin: 'java'
+apply plugin: 'com.android.library'
 apply from: '../maven-push-java-lib.gradle'
 apply plugin: 'findbugs'
 
