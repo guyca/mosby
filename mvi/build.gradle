@@ -38,7 +38,7 @@ android {
 }
 
 dependencies {
-
+  compile 'com.android.support:design:'+ rootProject.ext.supportLibVersion
   compile project(':mvi-common')
   compile project(':presentermanager')
   compile project(':utils-fragment')
