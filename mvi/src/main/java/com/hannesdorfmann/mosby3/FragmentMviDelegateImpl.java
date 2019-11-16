@@ -27,6 +27,8 @@ import android.support.v4.app.BackstackAccessor;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
+
+import com.hannesdorfmann.mosby3.mvi.MviFragment;
 import com.hannesdorfmann.mosby3.mvi.MviPresenter;
 import com.hannesdorfmann.mosby3.mvp.MvpView;
 import java.util.UUID;
@@ -62,8 +64,10 @@ public class FragmentMviDelegateImpl<V extends MvpView, P extends MviPresenter<V
   private final boolean keepPresenterOnBackstack;
   private P presenter;
   private boolean viewStateWillBeRestored;
+  private boolean instanceStateSaved = false;
 
-  public FragmentMviDelegateImpl(@NonNull MviDelegateCallback<V, P> delegateCallback,
+
+    public FragmentMviDelegateImpl(@NonNull MviDelegateCallback<V, P> delegateCallback,
       @NonNull Fragment fragment) {
     this(delegateCallback, fragment, true, true);
   }
@@ -192,14 +196,20 @@ public class FragmentMviDelegateImpl<V extends MvpView, P extends MviPresenter<V
       return false;
     }
 
-    if (keepPresenterOnBackstack && BackstackAccessor.isFragmentOnBackStack(fragment)) {
+    if (keepPresenterOnBackstack && !isRealRemoving(fragment)) {
       return true;
     }
 
     return !fragment.isRemoving();
   }
 
-  @Override public void onDestroyView() {
+    private boolean isRealRemoving(Fragment fragment) {
+        return (fragment.isRemoving() && !instanceStateSaved) //because isRemoving == true for fragment in backstack on screen rotation
+               || ((fragment.getParentFragment() instanceof MviFragment) &&
+                   ((MviFragment) fragment.getParentFragment()).getMvpDelegate().isRealRemoving());
+    }
+
+    @Override public void onDestroyView() {
     onViewCreatedCalled = false;
   }
 
@@ -247,6 +257,7 @@ public class FragmentMviDelegateImpl<V extends MvpView, P extends MviPresenter<V
   }
 
   @Override public void onResume() {
+      instanceStateSaved = false;
   }
 
   @NonNull private Activity getActivity() {
@@ -282,7 +293,8 @@ public class FragmentMviDelegateImpl<V extends MvpView, P extends MviPresenter<V
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
-    if ((keepPresenterDuringScreenOrientationChange || keepPresenterOnBackstack)
+      instanceStateSaved = true;
+      if ((keepPresenterDuringScreenOrientationChange || keepPresenterOnBackstack)
         && outState != null) {
       outState.putString(KEY_MOSBY_VIEW_ID, mosbyViewId);
 

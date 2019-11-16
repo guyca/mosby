@@ -68,6 +68,8 @@ public interface FragmentMviDelegate<V extends MvpView, P extends MviPresenter<V
    */
   void onDestroy();
 
+  boolean isRealRemoving(Fragment fragment);
+
   /**
    * Must be called from {@link Fragment#onViewCreated(View, Bundle)}
    *
