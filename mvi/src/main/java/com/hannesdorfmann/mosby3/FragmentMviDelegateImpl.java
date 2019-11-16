@@ -203,7 +203,7 @@ public class FragmentMviDelegateImpl<V extends MvpView, P extends MviPresenter<V
     return !fragment.isRemoving();
   }
 
-    private boolean isRealRemoving(Fragment fragment) {
+    public boolean isRealRemoving(Fragment fragment) {
         return (fragment.isRemoving() && !instanceStateSaved) //because isRemoving == true for fragment in backstack on screen rotation
                || ((fragment.getParentFragment() instanceof MviFragment) &&
                    ((MviFragment) fragment.getParentFragment()).getMvpDelegate().isRealRemoving());
